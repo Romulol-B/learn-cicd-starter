@@ -23,7 +23,7 @@ jobs:
       - name: now leaving
         run: exit 0
   style:
-    name: style
+    name: Style
     runs-on: ubuntu-latest
 
     steps:
