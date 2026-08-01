@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -27,16 +29,16 @@ var staticFiles embed.FS
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
+
 		log.Printf("warning: assuming default configuration. .env unreadable: %v", err)
 	}
-
 	port := os.Getenv("PORT")
+
 	if port == "" {
 		log.Fatal("PORT environment variable is not set")
 	}
 
 	apiCfg := apiConfig{}
-
 	// https://github.com/libsql/libsql-client-go/#open-a-connection-to-sqld
 	// libsql://[your-database].turso.io?authToken=[your-auth-token]
 	dbURL := os.Getenv("DATABASE_URL")
@@ -88,11 +90,15 @@ func main() {
 	v1Router.Get("/healthz", handlerReadiness)
 
 	router.Mount("/v1", v1Router)
-	srv := &http.Server{
-		Addr:    ":" + port,
-		Handler: router,
-	}
-
-	log.Printf("Serving on port: %s\n", port)
+	srv := newServer(port, router)
+	log.Printf("Serving on port: %s", strconv.Quote(port))
 	log.Fatal(srv.ListenAndServe())
+}
+
+func newServer(port string, handler http.Handler) *http.Server {
+	return &http.Server{
+		Addr:              ":" + port,
+		Handler:           handler,
+		ReadHeaderTimeout: 150 * time.Second,
+	}
 }
