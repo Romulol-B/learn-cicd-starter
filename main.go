@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
@@ -23,14 +24,15 @@ type apiConfig struct {
 
 var staticFiles embed.FS
 
+
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
 
 		log.Printf("warning: assuming default configuration. .env unreadable: %v", err)
 	}
-
 	port := os.Getenv("PORT")
+
 	if port == "" {
 		log.Fatal("PORT environment variable is not set")
 	}
@@ -90,8 +92,8 @@ func main() {
 	srv := &http.Server{
 		Addr:    ":" + port,
 		Handler: router,
+		ReadHeaderTimeout: 15,
 	}
-
-	log.Printf("Serving on port: %s\n", port)
+	log.Printf("Serving on port: %s",strconv.Quote(port))
 	log.Fatal(srv.ListenAndServe())
 }
