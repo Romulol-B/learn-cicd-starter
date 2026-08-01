@@ -23,7 +23,7 @@ jobs:
       - name: Install gosec
         run: go install github.com/securego/gosec/v2/cmd/gosec@latest
       - name: gosec
-        run: test $(gosec ./...)
+        run: test -z $(gosec ./...)
 
       - name: now leaving
         run: exit 0
